@@ -1,7 +1,5 @@
 plugins {
 	java
-	id("org.springframework.boot") version "4.0.0"
-	id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "cz.cernobilao"
@@ -19,18 +17,15 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter")
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("com.oracle.database.jdbc:ojdbc11")
-    implementation("org.eclipse:yasson")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation("org.hibernate.orm:hibernate-core:7.1.8.Final")
+	implementation("com.oracle.database.jdbc:ojdbc11:23.9.0.25.07")
+	implementation("org.eclipse:yasson:3.0.4")
+
+	testImplementation("org.junit.jupiter:junit-jupiter:5.12.1")
+	testImplementation("org.hibernate.validator:hibernate-validator-test-utils:9.1.0.Final")
+	testImplementation("org.hibernate.validator:hibernate-validator:9.1.0.Final")
+	testImplementation("org.glassfish.expressly:expressly:6.0.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
-
-    testImplementation("org.hibernate.validator:hibernate-validator-test-utils:9.1.0.Final")
-    testImplementation("org.hibernate.validator:hibernate-validator:9.1.0.Final")
-    testImplementation("org.glassfish.expressly:expressly:6.0.0")
-
 }
 
 tasks.withType<Test> {

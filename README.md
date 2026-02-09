@@ -1,37 +1,38 @@
-# Spring Boot 4.0.0 Possible Bug Demo
+# Hibernate ORM ORA-17068 Reproducer (No Spring)
 
-### Exception
+## Problem
+
+The test reproduces:
 
 ```
-Caused by: org.hibernate.exception.GenericJDBCException: Could not prepare statement [ORA-17068: Invalid arguments in call]
+ORA-17068: Invalid arguments in call
 ```
-### Cause
 
-Seems to be combination of:
-* Oracle Database Driver
-* application property `spring.jpa.properties.hibernate.use_sql_comments=true`
-* entity annotation @Generated,
-* entity annotation @JdbcTypeCode(SqlTypes.JSON),
-* call entity save method multiple times
+using only Hibernate ORM + Oracle JDBC driver (no Spring context).
 
+## Likely trigger combination
 
-### How to use this demo
+* Oracle JDBC driver + generated keys path on update
+* `@Generated(event = EventType.UPDATE)` on entity field
+* `@JdbcTypeCode(SqlTypes.JSON)` on entity field
+* SQL comments enabled (`hibernate.use_sql_comments=true`)
+* persist, then update the same entity
 
-* Make sure to set correct Java SDK version (21) for the project.
-* Set the your oracle database connection properties in application.properties file.
-* Create table in your oracle database:
-```sql
-CREATE TABLE "CAR" 
-(
-    "ID" NUMBER GENERATED ALWAYS AS IDENTITY (START WITH 1 INCREMENT BY 1) NOT NULL ENABLE,
-    "SPECS" VARCHAR2(36 CHAR), 
-    "MANUFACTURE_DATE" DATE, 
-    CONSTRAINT "CAR_PK" PRIMARY KEY ("ID") ENABLE
-);
+## Setup
+
+1. Use Java 21.
+2. Configure Oracle connection in `src/main/resources/application.properties`.
+3. Ensure the DB user can create tables. The test automatically creates `CAR` if it does not exist.
+
+## Run
+
+```bash
+./gradlew test --tests "*CarRepositoryTest" --rerun-tasks --info
 ```
-* Run CarRepositoryTest.
 
-### StackTrace
+The test passes only if `ORA-17068` is thrown and detected in the exception cause chain.
+
+## StackTrace
 ```
 Caused by: org.hibernate.exception.GenericJDBCException: Could not prepare statement [ORA-17068: Invalid arguments in call
 https://docs.oracle.com/error-help/db/ora-17068/] [/* update for cz.cernobilao.exception.demo.entity.Car */update car set specs=? where id=?]
@@ -78,13 +79,12 @@ https://docs.oracle.com/error-help/db/ora-17068/
 	... 40 more
 ```
 
-### Environment
+## Current environment
 
-* Oracle Database Version: 23.0.0.0.0
-* JDK Version: ms-21.0.8
-* Spring Boot Version: 4.0.0
-* Hibernate Version: 7.1.8.Final
-* ojdbc11 Version: 23.9.0.25.07
+* Oracle Database: 23.x
+* JDK: 21
+* Hibernate ORM: 7.1.8.Final
+* Oracle JDBC (`ojdbc11`): 23.9.0.25.07
 
 
 
